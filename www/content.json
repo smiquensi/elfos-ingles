@@ -1,0 +1,95 @@
+{
+  "es": {
+    "intro_vera": "Hola Vera, te voy a ayudar a mejorar con el inglés. ¡Ánimo, campeona!",
+    "intro": "Hola, te voy a ayudar a mejorar con el inglés. ¡Ánimo, campeona!",
+    "great": "¡Muy bien!",
+    "great2": "¡Genial!",
+    "great3": "¡Eso es!",
+    "oops": "¡Casi! Escucha otra vez.",
+    "listen_tap": "Escucha y toca la respuesta correcta.",
+    "read_tap": "Lee y toca la imagen.",
+    "build": "Ordena las palabras para formar la frase.",
+    "repeat": "Ahora repite en voz alta.",
+    "learn": "Mira y escucha. Repite conmigo.",
+    "lesson_done": "¡Lección completada! Has ganado una caja sorpresa.",
+    "open_box": "Toca la caja para abrirla.",
+    "surprise": "¡Sorpresa!",
+    "review_today": "Hoy toca repasar un poquito.",
+    "review_done": "¡Repaso hecho! Tu memoria es fuerte.",
+    "title_l1": "Lección uno: hola y adiós.",
+    "title_l2": "Lección dos: los colores.",
+    "title_l3": "Lección tres: los números.",
+    "title_l4": "Lección cuatro: yo soy, tú eres.",
+    "title_l5": "Lección cinco: él es, ella es."
+  },
+  "lessons": [
+    {
+      "id": "l1", "title": "Hola y adiós", "title_key": "title_l1", "icon": "👋",
+      "items": [
+        {"id": "hello", "en": "hello", "es": "hola", "vis": {"t": "emoji", "v": "🙋"}},
+        {"id": "goodbye", "en": "goodbye", "es": "adiós", "vis": {"t": "emoji", "v": "👋"}},
+        {"id": "yes", "en": "yes", "es": "sí", "vis": {"t": "emoji", "v": "✅"}},
+        {"id": "no", "en": "no", "es": "no", "vis": {"t": "emoji", "v": "❌"}},
+        {"id": "please", "en": "please", "es": "por favor", "vis": {"t": "emoji", "v": "🙏"}},
+        {"id": "thank_you", "en": "thank you", "es": "gracias", "vis": {"t": "emoji", "v": "🎁"}}
+      ],
+      "sentences": []
+    },
+    {
+      "id": "l2", "title": "Los colores", "title_key": "title_l2", "icon": "🎨",
+      "items": [
+        {"id": "red", "en": "red", "es": "rojo", "vis": {"t": "swatch", "v": "#E53935"}},
+        {"id": "blue", "en": "blue", "es": "azul", "vis": {"t": "swatch", "v": "#1E88E5"}},
+        {"id": "yellow", "en": "yellow", "es": "amarillo", "vis": {"t": "swatch", "v": "#FDD835"}},
+        {"id": "green", "en": "green", "es": "verde", "vis": {"t": "swatch", "v": "#43A047"}},
+        {"id": "pink", "en": "pink", "es": "rosa", "vis": {"t": "swatch", "v": "#EC407A"}},
+        {"id": "purple", "en": "purple", "es": "morado", "vis": {"t": "swatch", "v": "#8E24AA"}}
+      ],
+      "sentences": []
+    },
+    {
+      "id": "l3", "title": "Los números", "title_key": "title_l3", "icon": "🔢",
+      "items": [
+        {"id": "one", "en": "one", "es": "uno", "vis": {"t": "num", "v": 1}},
+        {"id": "two", "en": "two", "es": "dos", "vis": {"t": "num", "v": 2}},
+        {"id": "three", "en": "three", "es": "tres", "vis": {"t": "num", "v": 3}},
+        {"id": "four", "en": "four", "es": "cuatro", "vis": {"t": "num", "v": 4}},
+        {"id": "five", "en": "five", "es": "cinco", "vis": {"t": "num", "v": 5}}
+      ],
+      "sentences": []
+    },
+    {
+      "id": "l4", "title": "Yo soy, tú eres", "title_key": "title_l4", "icon": "🧝",
+      "items": [
+        {"id": "i", "en": "I", "es": "yo", "vis": {"t": "emoji", "v": "🙋"}},
+        {"id": "you", "en": "you", "es": "tú", "vis": {"t": "emoji", "v": "👉"}},
+        {"id": "elf", "en": "elf", "es": "elfo / elfa", "vis": {"t": "emoji", "v": "🧝"}},
+        {"id": "happy", "en": "happy", "es": "feliz", "vis": {"t": "emoji", "v": "😊"}}
+      ],
+      "sentences": [
+        {"id": "s_i_am_an_elf", "en": "I am an elf.", "es": "Yo soy un elfo.", "vis": {"t": "elf", "v": "me"}},
+        {"id": "s_you_are_an_elf", "en": "You are an elf.", "es": "Tú eres un elfo.", "vis": {"t": "elf", "v": "nova"}},
+        {"id": "s_i_am_name", "en": "I am {name}.", "es": "Yo soy {name}.", "vis": {"t": "elf", "v": "me"}},
+        {"id": "s_i_am_happy", "en": "I am happy.", "es": "Yo estoy feliz.", "vis": {"t": "emoji", "v": "😊"}},
+        {"id": "s_you_are_happy", "en": "You are happy.", "es": "Tú estás feliz.", "vis": {"t": "emoji", "v": "😄"}}
+      ]
+    },
+    {
+      "id": "l5", "title": "Él es, ella es", "title_key": "title_l5", "icon": "👫",
+      "items": [
+        {"id": "boy", "en": "boy", "es": "chico", "vis": {"t": "emoji", "v": "👦"}},
+        {"id": "girl", "en": "girl", "es": "chica", "vis": {"t": "emoji", "v": "👧"}},
+        {"id": "he", "en": "he", "es": "él", "vis": {"t": "elf", "v": "pipo"}},
+        {"id": "she", "en": "she", "es": "ella", "vis": {"t": "elf", "v": "luna"}}
+      ],
+      "sentences": [
+        {"id": "s_he_is_a_boy", "en": "He is a boy.", "es": "Él es un chico.", "vis": {"t": "elf", "v": "pipo"}},
+        {"id": "s_she_is_a_girl", "en": "She is a girl.", "es": "Ella es una chica.", "vis": {"t": "elf", "v": "luna"}},
+        {"id": "s_he_is_pipo", "en": "He is Pipo.", "es": "Él es Pipo.", "vis": {"t": "elf", "v": "pipo"}},
+        {"id": "s_she_is_luna", "en": "She is Luna.", "es": "Ella es Luna.", "vis": {"t": "elf", "v": "luna"}},
+        {"id": "s_he_is_happy", "en": "He is happy.", "es": "Él está feliz.", "vis": {"t": "elf", "v": "pipo"}},
+        {"id": "s_she_is_happy", "en": "She is happy.", "es": "Ella está feliz.", "vis": {"t": "elf", "v": "luna"}}
+      ]
+    }
+  ]
+}

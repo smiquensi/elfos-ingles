@@ -1,0 +1,6 @@
+{
+  "appId": "com.samias.elfos",
+  "appName": "Elfos del Inglés",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

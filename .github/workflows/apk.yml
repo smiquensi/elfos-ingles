@@ -1,0 +1,52 @@
+name: Construir APK
+# Solo se ejecuta cuando lo lanzas a mano (Actions > Construir APK > Run workflow). No gasta minutos en cada cambio.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: apk
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Preparar clave de firma
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KS_B64" ]; then echo "Falta el secreto ANDROID_KEYSTORE_BASE64 (ver README)"; exit 1; fi
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/elfos.keystore"
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/elfos.keystore" >> "$GITHUB_ENV"
+      - run: npm ci
+      - run: npx cap sync android
+      - name: Compilar APK firmado
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon
+      - name: Renombrar
+        run: cp android/app/build/outputs/apk/release/app-release.apk elfos-ingles.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elfos-ingles-apk
+          path: elfos-ingles.apk
+          retention-days: 14
+      - name: Publicar en Releases (descarga directa desde la tablet)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Elfos del Inglés 1.0.${{ github.run_number }}
+          files: elfos-ingles.apk
