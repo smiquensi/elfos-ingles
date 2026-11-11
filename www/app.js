@@ -59,7 +59,14 @@ function fresh() {
     owned: ['o_basic'], eq: { outfit: 'o_basic', hat: null, hair: null, friend: null, pet: null }, done: {}, stars: {}, boxes: 0, opened: 0, sparkles: 0, sr: {}, dayOff: 0, claimed: -1, intro: false };
 }
 /* Guardado doble: localStorage + almacén nativo de Android (Capacitor Preferences). Sobrevive a reinicios y a actualizar el APK. */
-const NP = () => { try { return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences; } catch (e) { return null; } };
+const NP = () => {
+  try {
+    const c = window.Capacitor;
+    if (c && typeof c.nativePromise === 'function' && c.isNativePlatform && c.isNativePlatform())
+      return { set: o => c.nativePromise('Preferences', 'set', o), get: o => c.nativePromise('Preferences', 'get', o), remove: o => c.nativePromise('Preferences', 'remove', o) };
+    return (c && c.Plugins && c.Plugins.Preferences) || null; // (pruebas en navegador)
+  } catch (e) { return null; }
+};
 const parseS = t => { try { const s = JSON.parse(t); return s && s.v === 1 ? s : null; } catch (e) { return null; } };
 function load() { try { return parseS(localStorage.getItem(SK)); } catch (e) { return null; } }
 function save() {
@@ -141,7 +148,60 @@ function tone(freqs, dur, type, vol) {
       g.gain.setValueAtTime(vol || .15, t + i * dur); g.gain.exponentialRampToValueAtTime(.001, t + i * dur + dur * 1.6); o.start(t + i * dur); o.stop(t + i * dur + dur * 1.7); });
   } catch (e) {}
 }
+/* alterna castellano e inglés (y rota las frases) para que no se repita siempre lo mismo */
+async function sayUI(cat, esKeys, enKeys) {
+  S.alt = S.alt || {}; const n = S.alt[cat] = (S.alt[cat] || 0) + 1, idx = Math.floor((n - 1) / 2);
+  return (n % 2) ? sayEs(esKeys[idx % esKeys.length]) : say('en:ui_' + enKeys[idx % enKeys.length]);
+}
+async function ins(s, kind, es, en) { s.said = s.said || {}; if (s.said[kind]) return; s.said[kind] = 1; await sayUI('i_' + kind, [es], [en]); }
+async function praise(s) { s.ok = (s.ok || 0) + 1; if (s.ok % 3 === 1) await sayUI('p', ['great', 'great2', 'great3', 'great4', 'great5', 'great6'], ['praise1', 'praise2', 'praise3', 'praise4', 'praise5', 'praise6']); }
 const sfx = { ok: () => tone([660, 880], .1), bad: () => tone([220, 180], .15, 'sine', .12), win: () => tone([523, 659, 784, 1047], .12), box: () => tone([392, 523, 659, 784, 1047, 1319], .09) };
+/* ---------- comprobación de lectura (micrófono, solo en la app Android) ---------- */
+const SRn = (m, o) => window.Capacitor.nativePromise('SpeechRecognition', m, o);
+let MIC = false;
+async function micInit() {
+  try { const c = window.Capacitor; if (!(c && c.nativePromise && c.isNativePlatform && c.isNativePlatform())) return (MIC = false); const a = await SRn('available'); return (MIC = !!(a && a.available)); } catch (e) { return (MIC = false); }
+}
+async function micPerm() { try { let p = await SRn('checkPermissions'); if (p.speechRecognition !== 'granted') p = await SRn('requestPermissions'); return p.speechRecognition === 'granted'; } catch (e) { return false; } }
+async function listenOnce() {
+  try {
+    const r = await Promise.race([SRn('start', { language: 'en-US', maxResults: 5, partialResults: false, popup: false }), new Promise(res => setTimeout(() => res({ status: 'timeout' }), 9000))]);
+    if (r && r.status === 'timeout') { SRn('stop').catch(() => {}); return []; }
+    return (r && r.matches) || [];
+  } catch (e) { return null; }
+}
+const ALIAS = { i: ['eye', 'ai', 'aye'], he: ['hi', 'hey', 'e'], she: ['see', 'sea', 'sheet'], you: ['u', 'ew', 'yu'], no: ['know', 'now'], yes: ['yeah', 'yep', 'yess'], two: ['to', 'too'], four: ['for', 'fore'], one: ['won', 'want'], hello: ['hallo', 'hullo', 'hell o'], please: ['pleas', 'peas', 'plays'], blue: ['blu', 'blew'], green: ['grin', 'gren'], red: ['read', 'wred'], pink: ['think', 'ping'], three: ['tree', 'free', 'tri'], five: ['fife', 'fibe'], elf: ['elf', 'help', 'else', 'self'], happy: ['hoppy', 'happi'], girl: ['gal', 'girls'], boy: ['boi', 'buoy', 'bye'], thank: ['thanks', 'think', 'tank'], goodbye: ['good bye', 'goodby', 'good by'] };
+const normT = t => (t || '').toLowerCase().replace(/[^a-z' ]/g, ' ').replace(/\s+/g, ' ').trim();
+function lev(a, b) { const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j; for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; }
+const simW = (a, b) => (a === b || (ALIAS[b] || []).includes(a)) ? 1 : 1 - lev(a, b) / Math.max(a.length, b.length);
+/* tolerante: vale con parecerse (no exige pronunciación perfecta) */
+function heardOk(target, matches) {
+  const T = normT(enText(target)), tw = T.split(' ');
+  return (matches || []).some(m => { const M = normT(m); if (!M) return false; if (M === T) return true; const mw = M.split(' ');
+    if (tw.length === 1) return mw.some(w => simW(w, T) >= .6) || simW(mw.join(''), T) >= .6;
+    return tw.filter(w => mw.some(x => simW(x, w) >= .6)).length / tw.length >= .7; });
+}
+async function micRead() {
+  const q = curQ(), s = ui.sess; if (!q || q.k !== 'say' || q.busy || q.locked) return;
+  if (!(await micPerm())) { MIC = false; render(); return; }
+  q.busy = true; q.st = 'listen'; stopAudio(); render();
+  const heard = await listenOnce();
+  if (ui.screen !== 'sess' || curQ() !== q) return;
+  q.busy = false;
+  if (heard === null) { q.err = (q.err || 0) + 1; q.st = ''; if (q.err >= 2) MIC = false; render(); return; }
+  q.tries = (q.tries || 0) + 1;
+  if (heardOk(q.it.en, heard)) {
+    q.locked = true; q.st = 'ok'; s.readOk = (s.readOk || 0) + 1; s.readTot = (s.readTot || 0) + 1; sfx.ok(); clap(); render();
+    await sayEn(q.it.en); if (ui.screen === 'sess' && curQ() === q) { await praise(s); if (ui.screen === 'sess' && curQ() === q) next(); }
+  } else if (q.tries >= 3) {
+    q.locked = true; q.st = 'give'; s.readTot = (s.readTot || 0) + 1; s.miss[q.it.id] = (s.miss[q.it.id] || 0) + 1; s.misses = (s.misses || 0) + 1; sfx.bad(); render();
+    await sayUI('t', ['tryagain'], ['tryagain']); if (curQ() === q) { await sayEn(q.it.en); if (ui.screen === 'sess' && curQ() === q) next(); }
+  } else {
+    q.st = 'bad'; q.heard = (heard[0] || ''); sfx.bad(); render();
+    await sayUI('t', ['tryagain'], ['tryagain']); if (curQ() === q) sayEn(q.it.en);
+  }
+}
+
 function confetti() {
   const d = document.createElement('div'); d.className = 'conf';
   d.innerHTML = Array.from({ length: 34 }, () => `<span style="left:${Math.random() * 100}%;animation-delay:${Math.random() * .8}s">${['✨', '⭐', '💖', '🎉', '❄️'][Math.random() * 5 | 0]}</span>`).join('');
@@ -159,13 +219,24 @@ function grade(id, ok) {
 }
 
 /* ---------- sesiones ---------- */
+function snap() {
+  if (!S) return; const s = ui && ui.sess;
+  S.sess = s ? { kind: s.kind, lid: s.L ? s.L.id : null, i: s.i, miss: s.miss, misses: s.misses || 0, total: s.total, q: s.queue.map(q => ({ k: q.k, id: q.it.id, r: q.retried || 0 })) } : null;
+  save();
+}
+function restoreSess() {
+  const r = S && S.sess; if (!r || !r.q) return null;
+  const A = allItems(), queue = r.q.filter(x => A[x.id]).map(x => ({ k: x.k, it: A[x.id].it, L: A[x.id].L, retried: x.r || undefined }));
+  if (!queue.length || r.i >= queue.length) return null;
+  return { kind: r.kind, L: r.lid ? C.lessons.find(l => l.id === r.lid) : undefined, queue, i: r.i, miss: r.miss || {}, misses: r.misses || 0, total: r.total || queue.length, extra: 0 };
+}
 function lessonQueue(L) {
   const q = [];
   [...L.items, ...L.sentences].forEach(it => q.push({ k: 'learn', it, L }));
   shuffle(L.items).forEach(it => q.push({ k: 'listen', it, L }));
   shuffle(L.items).forEach(it => q.push({ k: 'read', it, L }));
   shuffle(L.sentences).forEach(it => q.push({ k: 'build', it, L }));
-  pick([...L.items, ...L.sentences], 3).forEach(it => q.push({ k: 'say', it, L }));
+  pick([...L.items, ...L.sentences], 4).forEach(it => q.push({ k: 'say', it, L }));
   return q;
 }
 function reviewQueue() {
@@ -174,13 +245,15 @@ function reviewQueue() {
     const { it, L, sent } = A[id];
     q.push({ k: sent ? 'build' : (Math.random() < .5 ? 'listen' : 'read'), it, L });
   });
-  return shuffle(q);
+  shuffle(q);
+  if (MIC) pick(dueIds().filter(id => A[id]), 2).forEach(id => q.push({ k: 'say', it: A[id].it, L: A[id].L }));
+  return q;
 }
 function startSession(kind, L) {
   const queue = kind === 'review' ? reviewQueue() : lessonQueue(L);
   if (!queue.length) return;
   ui = { screen: 'sess', sess: { kind, L, queue, i: 0, miss: {}, total: queue.length, extra: 0 } };
-  enterQ(true);
+  snap(); enterQ(true);
 }
 const curQ = () => ui.sess.queue[ui.sess.i];
 function prepQ(q) {
@@ -197,38 +270,40 @@ async function enterQ(first) {
   const q = curQ(); prepQ(q); q.locked = false; render();
   const s = ui.sess;
   if (first && s.kind === 'review') await sayEs('review_today');
-  if (q.k === 'learn') { if (first) await sayEs('learn'); if (ui.sess === s && curQ() === q) await sayEn(q.it.en); return; }
-  if (q.k === 'listen') { await sayEs('listen_tap'); if (curQ() === q) sayEn(q.it.en); }
-  else if (q.k === 'read') { await sayEs('read_tap'); }
-  else if (q.k === 'build') { await sayEs('build'); if (curQ() === q) sayEn(q.it.en); }
-  else if (q.k === 'say') { await sayEs('repeat'); if (curQ() === q) sayEn(q.it.en); }
+  if (q.k === 'learn') { if (first) await sayUI('i_learn', ['learn'], ['learn']); if (ui.sess === s && curQ() === q) await sayEn(q.it.en); return; }
+  if (q.k === 'listen') { await ins(s, 'listen', 'listen_tap', 'listen'); if (curQ() === q) sayEn(q.it.en); }
+  else if (q.k === 'read') { await ins(s, 'read', 'read_tap', 'read'); }
+  else if (q.k === 'build') { await ins(s, 'build', 'build', 'build'); if (curQ() === q) sayEn(q.it.en); }
+  else if (q.k === 'say') { q.tries = 0; q.st = ''; if (MIC) { await ins(s, 'say', 'readaloud', 'readaloud'); } else { await ins(s, 'say', 'repeat', 'repeat'); if (curQ() === q) sayEn(q.it.en); } }
 }
-function miss(q) { const s = ui.sess; s.miss[q.it.id] = (s.miss[q.it.id] || 0) + 1; s.misses = (s.misses || 0) + 1; if (!q.retried && s.queue.length < s.total + 6) { s.queue.push({ k: q.k, it: q.it, L: q.L, retried: 1 }); } }
+function miss(q) { const s = ui.sess; s.miss[q.it.id] = (s.miss[q.it.id] || 0) + 1; s.misses = (s.misses || 0) + 1; if (!q.retried && s.queue.length < s.total + 6) { s.queue.push({ k: q.k, it: q.it, L: q.L, retried: 1 }); } snap(); }
 async function correct(q) {
   q.locked = true; sfx.ok(); clap();
-  await sayEs(['great', 'great2', 'great3'][Math.random() * 3 | 0]);
+  await praise(ui.sess);
   if (ui.screen === 'sess' && curQ() === q) next();
 }
 function next() {
   const s = ui.sess; s.i++;
   if (s.i >= s.queue.length) return finish();
-  enterQ(false);
+  snap(); enterQ(false);
 }
 async function finish() {
   const s = ui.sess, A = allItems();
-  const ids = new Set(s.queue.filter(q => q.k !== 'learn' && q.k !== 'say').map(q => q.it.id));
+  const ids = new Set(s.queue.filter(q => q.k !== 'learn').map(q => q.it.id));
   ids.forEach(id => grade(id, !s.miss[id]));
   const m = s.misses || 0, stars = m <= 1 ? 3 : m <= 4 ? 2 : 1;
   let gotBox = false;
-  if (s.kind === 'lesson') {
+  const readLow = !!s.readTot && (s.readOk || 0) / s.readTot < .5; // ha leído poco: sin caja ni lección nueva
+  if (readLow) { S.sparkles += 1; }
+  else if (s.kind === 'lesson') {
     const first = !S.done[s.L.id];
     S.done[s.L.id] = true; S.stars[s.L.id] = Math.max(S.stars[s.L.id] || 0, stars);
     if (first || stars === 3) { S.boxes++; gotBox = true; } else S.sparkles += 3;
   } else if (S.claimed !== today()) { S.claimed = today(); S.boxes++; gotBox = true; } else S.sparkles += 2;
-  save();
-  ui = { screen: 'result', kind: s.kind, stars, gotBox };
+  S.sess = null; save();
+  ui = { screen: 'result', kind: s.kind, stars, gotBox, readLow };
   render(); sfx.win(); confetti();
-  await sayEs(s.kind === 'review' ? 'review_done' : 'lesson_done');
+  if (readLow) await sayUI('r', ['readlow'], ['readlow']); else await sayEs(s.kind === 'review' ? 'review_done' : 'lesson_done');
 }
 
 /* ---------- elfo mascota (asoma y aplaude) ---------- */
@@ -272,7 +347,7 @@ function vHome() {
   }).join('');
   return `${topBar(`<span class="chip">🎁 ${S.boxes}</span>`)}<div class="home"><div><div class="stage"><div class="hello">¡Hola, ${esc(S.name)}!</div><div class="scene">${fr}<div class="me">${elfSVG(effCfg(), 190)}</div>${pt}</div></div>
   <div class="row"><button class="btn alt" data-act="closet">👗 Armario</button><button class="btn ${due ? 'green' : 'alt'}" data-act="review" ${due ? '' : 'disabled'}>🔁 Repaso${due ? `<span class="badge">${due}</span>` : ' ✓'}</button></div></div>
-  <div class="path">${S.boxes ? `<button class="gift" data-act="box">🎁 ¡Tienes ${S.boxes} caja${S.boxes > 1 ? 's' : ''} sorpresa!</button>` : ''}${lessons}</div></div><button class="gear" data-act="gear" aria-label="Opciones">⚙</button>`;
+  <div class="path">${restoreSess() ? `<button class="gift" data-act="resume">▶️ Seguir donde lo dejaste</button>` : ''}${S.boxes ? `<button class="gift" data-act="box">🎁 ¡Tienes ${S.boxes} caja${S.boxes > 1 ? 's' : ''} sorpresa!</button>` : ''}${lessons}</div></div><button class="gear" data-act="gear" aria-label="Opciones">⚙</button>`;
 }
 function vSess() {
   const s = ui.sess, q = curQ(), pct = Math.round(s.i / s.queue.length * 100);
@@ -287,6 +362,9 @@ function vSess() {
     h = `<h2>👀 Lee</h2><div class="bigw">${esc(enText(q.it.en))}</div><button class="spk" data-act="spk" aria-label="Escuchar">🔊</button><div class="opts">${q.opts.map((o, i) => `<button class="opt" data-act="opt" data-i="${i}">${vis(o.vis)}<span class="lab">${esc(enText(o.es))}</span></button>`).join('')}</div>`;
   } else if (q.k === 'build') {
     h = `<h2>🧩 Forma la frase</h2><div class="vis">${vis(q.it.vis)}</div><div class="es">${esc(enText(q.it.es))}</div><button class="spk" data-act="spk" aria-label="Escuchar">🔊</button><div class="ans" id="ans">${q.placed.map((ti, pi) => `<button class="tile" data-act="unplace" data-p="${pi}">${esc(q.tok[ti])}</button>`).join('')}</div><div class="pool">${q.order.map(ti => `<button class="tile ${q.placed.includes(ti) ? 'used' : ''}" data-act="place" data-t="${ti}">${esc(q.tok[ti])}</button>`).join('')}</div>`;
+  } else if (q.k === 'say' && MIC) {
+    const msg = q.st === 'bad' ? `<p class="hint">Casi… he oído «${esc(q.heard || '…')}». ¡Inténtalo otra vez, despacito!</p>` : q.st === 'ok' ? '<p class="hint">¡Muy bien leído! 🌟</p>' : q.st === 'give' ? '<p class="hint">Escucha cómo se dice y sigue ➜</p>' : '';
+    h = `<h2>🗣️ Léelo en voz alta</h2><div class="bigw">${esc(enText(q.it.en))}</div><div class="es">${esc(enText(q.it.es))}</div>${q.st === 'listen' ? '<div class="micring">🎤 Te escucho…</div>' : q.locked ? '' : '<button class="btn big green" data-act="mic">🎤 Pulsa y léelo</button>'}${msg}${q.locked ? '' : '<br><button class="spk" data-act="spk" aria-label="Escuchar">🔊</button>'}`;
   } else if (q.k === 'say') {
     h = `<h2>🗣️ Repite</h2><div class="bigw">${esc(enText(q.it.en))}</div><div class="es">${esc(enText(q.it.es))}</div><button class="spk" data-act="spk" aria-label="Escuchar">🔊</button><br><button class="btn big green" data-act="said">🎤 ¡Ya lo dije!</button>`;
   }
@@ -294,7 +372,7 @@ function vSess() {
 }
 function vResult() {
   const r = ui;
-  return `<div class="card center"><h1>${r.kind === 'review' ? '¡Repaso hecho!' : '¡Lección completada!'}</h1><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(3 - r.stars)}</div>${r.gotBox ? '<div style="font-size:90px">🎁</div><p style="font-size:20px">¡Has ganado una caja sorpresa!</p>' : '<p style="font-size:20px">✨ ¡Has ganado polvo de brillo!</p>'}<div class="row">${r.gotBox ? '<button class="btn green" data-act="box">Abrir caja 🎁</button>' : ''}<button class="btn alt" data-act="home">Inicio</button></div></div>`;
+  return `<div class="card center"><h1>${r.readLow ? '¡Casi lo tienes!' : r.kind === 'review' ? '¡Repaso hecho!' : '¡Lección completada!'}</h1><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(3 - r.stars)}</div>${r.readLow ? '<p style="font-size:20px">🗣️ Lee en voz alta un poquito mejor para abrir la caja y la siguiente lección. ¡Tú puedes!</p>' : r.gotBox ? '<div style="font-size:90px">🎁</div><p style="font-size:20px">¡Has ganado una caja sorpresa!</p>' : '<p style="font-size:20px">✨ ¡Has ganado polvo de brillo!</p>'}<div class="row">${r.gotBox ? '<button class="btn green" data-act="box">Abrir caja 🎁</button>' : ''}<button class="btn alt" data-act="home">Inicio</button></div></div>`;
 }
 function vBox() {
   const b = ui.box;
@@ -351,17 +429,19 @@ document.addEventListener('click', async e => {
   if (act === 'wname') { const v = ($('#nm').value || '').trim(); if (!v) { ui.err = 'Escribe tu nombre'; ui.nm = ''; render(); return; } ui.nm = v; ui.err = ''; ui.wstep = 'create'; ui.cfg = { ...fresh().cfg }; render(); }
   else if (act === 'cfg') { ui.cfg[el.dataset.k] = el.dataset.v; render(); }
   else if (act === 'wdone') { S = fresh(); S.name = ui.nm; S.cfg = ui.cfg; S.intro = true; save(); ui = { screen: 'home' }; render(); sayEs(S.name.toLowerCase() === 'vera' ? 'intro_vera' : 'intro'); }
+  else if (act === 'resume') { const r = restoreSess(); if (r) { ui = { screen: 'sess', sess: r }; enterQ(false); } }
   else if (act === 'lesson') { startSession('lesson', C.lessons.find(l => l.id === el.dataset.id)); }
   else if (act === 'review') { startSession('review'); }
   else if (act === 'spk') { const q = curQ(); sayEn(q.it.en); }
   else if (act === 'next') { clap(); next(); }
   else if (act === 'quit') { stopAudio(); ui = { screen: 'home' }; render(); }
+  else if (act === 'mic') micRead();
   else if (act === 'said') { sfx.ok(); clap(); curQ().locked = true; next(); }
   else if (act === 'opt') {
     const q = curQ(); if (q.locked) return;
     const o = q.opts[+el.dataset.i];
     if (o.id === q.it.id) { el.classList.add('ok'); correct(q); }
-    else { el.classList.add('bad'); sfx.bad(); miss(q); await sayEs('oops'); if (curQ() === q) sayEn(q.it.en); }
+    else { el.classList.add('bad'); sfx.bad(); miss(q); await sayUI('o', ['oops', 'oops2'], ['oops1', 'oops2']); if (curQ() === q) sayEn(q.it.en); }
   }
   else if (act === 'place') { const q = curQ(); if (q.locked) return; q.placed.push(+el.dataset.t); render(); if (q.placed.length === q.tok.length) checkBuild(q); }
   else if (act === 'unplace') { const q = curQ(); if (q.locked) return; q.placed.splice(+el.dataset.p, 1); render(); }
@@ -388,8 +468,8 @@ document.addEventListener('click', async e => {
 async function checkBuild(q) {
   const ok = q.placed.map(i => q.tok[i]).join(' ') === q.tok.join(' ');
   const ans = $('#ans');
-  if (ok) { ans && ans.classList.add('ok'); q.locked = true; sfx.ok(); clap(); await sayEn(q.it.en); if (ui.screen === 'sess' && curQ() === q) { await sayEs('great'); if (ui.screen === 'sess' && curQ() === q) next(); } }
-  else { ans && ans.classList.add('bad'); sfx.bad(); miss(q); q.locked = true; await sayEs('oops'); if (curQ() === q) { q.placed = []; q.locked = false; render(); sayEn(q.it.en); } }
+  if (ok) { ans && ans.classList.add('ok'); q.locked = true; sfx.ok(); clap(); await sayEn(q.it.en); if (ui.screen === 'sess' && curQ() === q) { await praise(ui.sess); if (ui.screen === 'sess' && curQ() === q) next(); } }
+  else { ans && ans.classList.add('bad'); sfx.bad(); miss(q); q.locked = true; await sayUI('o', ['oops', 'oops2'], ['oops1', 'oops2']); if (curQ() === q) { q.placed = []; q.locked = false; render(); sayEn(q.it.en); } }
 }
 
 /* ---------- arranque ---------- */
@@ -400,6 +480,9 @@ async function boot() {
   if (location.hash === '#debug') window.__dbg = () => ({ ui, S });
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
   S = await loadBest();
+  micInit();
+  document.addEventListener('visibilitychange', () => { if (document.hidden && S) save(); });
+  window.addEventListener('pagehide', () => { if (S) save(); });
   ui = S && S.name ? { screen: 'home' } : { screen: 'welcome', wstep: 'name', nm: '', err: '' };
   render();
 }
