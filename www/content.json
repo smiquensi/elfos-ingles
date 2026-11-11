@@ -27,7 +27,16 @@
   "oops2": "¡Uy! Prueba otra vez.",
   "readaloud": "Lee en voz alta. Pulsa el micrófono.",
   "tryagain": "¡Casi! Lee otra vez, despacito.",
-  "readlow": "Lee en voz alta un poquito mejor para abrir la siguiente lección."
+  "readlow": "Lee en voz alta un poquito mejor para abrir la siguiente lección.",
+  "title_l6": "Lección seis: los números del seis al diez.",
+  "title_l7": "Lección siete: los animales.",
+  "title_l8": "Lección ocho: mi familia.",
+  "title_l9": "Lección nueve: yo puedo.",
+  "title_l10": "Lección diez: yo no puedo.",
+  "title_l11": "Lección once: yo tengo.",
+  "title_l12": "Lección doce: me gusta.",
+  "prank": "¡Travesura de elfos!",
+  "giggle": "¡Ji, ji, ji, ji!"
  },
  "lessons": [
   {
@@ -397,6 +406,742 @@
      "vis": {
       "t": "elf",
       "v": "luna"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l6",
+   "title": "Los números 6-10",
+   "title_key": "title_l6",
+   "icon": "🔢",
+   "items": [
+    {
+     "id": "six",
+     "en": "six",
+     "es": "seis",
+     "vis": {
+      "t": "num",
+      "v": "6"
+     }
+    },
+    {
+     "id": "seven",
+     "en": "seven",
+     "es": "siete",
+     "vis": {
+      "t": "num",
+      "v": "7"
+     }
+    },
+    {
+     "id": "eight",
+     "en": "eight",
+     "es": "ocho",
+     "vis": {
+      "t": "num",
+      "v": "8"
+     }
+    },
+    {
+     "id": "nine",
+     "en": "nine",
+     "es": "nueve",
+     "vis": {
+      "t": "num",
+      "v": "9"
+     }
+    },
+    {
+     "id": "ten",
+     "en": "ten",
+     "es": "diez",
+     "vis": {
+      "t": "num",
+      "v": "10"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_i_am_six",
+     "en": "I am six.",
+     "es": "Yo tengo seis años.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎂"
+     }
+    },
+    {
+     "id": "s_you_are_seven",
+     "en": "You are seven.",
+     "es": "Tú tienes siete años.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎈"
+     }
+    },
+    {
+     "id": "s_i_am_eight",
+     "en": "I am eight.",
+     "es": "Yo tengo ocho años.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎂"
+     }
+    },
+    {
+     "id": "s_he_is_nine",
+     "en": "He is nine.",
+     "es": "Él tiene nueve años.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎁"
+     }
+    },
+    {
+     "id": "s_she_is_ten",
+     "en": "She is ten.",
+     "es": "Ella tiene diez años.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎉"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l7",
+   "title": "Los animales",
+   "title_key": "title_l7",
+   "icon": "🐾",
+   "items": [
+    {
+     "id": "it",
+     "en": "it",
+     "es": "eso / ello (para cosas y animales)",
+     "vis": {
+      "t": "emoji",
+      "v": "🐾"
+     }
+    },
+    {
+     "id": "cat",
+     "en": "cat",
+     "es": "gato",
+     "vis": {
+      "t": "emoji",
+      "v": "🐱"
+     }
+    },
+    {
+     "id": "dog",
+     "en": "dog",
+     "es": "perro",
+     "vis": {
+      "t": "emoji",
+      "v": "🐶"
+     }
+    },
+    {
+     "id": "bird",
+     "en": "bird",
+     "es": "pájaro",
+     "vis": {
+      "t": "emoji",
+      "v": "🐦"
+     }
+    },
+    {
+     "id": "fish",
+     "en": "fish",
+     "es": "pez",
+     "vis": {
+      "t": "emoji",
+      "v": "🐟"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_it_is_a_cat",
+     "en": "It is a cat.",
+     "es": "Es un gato.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐱"
+     }
+    },
+    {
+     "id": "s_it_is_a_dog",
+     "en": "It is a dog.",
+     "es": "Es un perro.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐶"
+     }
+    },
+    {
+     "id": "s_it_is_a_bird",
+     "en": "It is a bird.",
+     "es": "Es un pájaro.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐦"
+     }
+    },
+    {
+     "id": "s_it_is_a_fish",
+     "en": "It is a fish.",
+     "es": "Es un pez.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐟"
+     }
+    },
+    {
+     "id": "s_it_is_happy",
+     "en": "It is happy.",
+     "es": "Está feliz.",
+     "vis": {
+      "t": "emoji",
+      "v": "😸"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l8",
+   "title": "Mi familia",
+   "title_key": "title_l8",
+   "icon": "👨‍👩‍👧",
+   "items": [
+    {
+     "id": "this",
+     "en": "this",
+     "es": "esto / este",
+     "vis": {
+      "t": "emoji",
+      "v": "👉"
+     }
+    },
+    {
+     "id": "my",
+     "en": "my",
+     "es": "mi",
+     "vis": {
+      "t": "emoji",
+      "v": "🙋"
+     }
+    },
+    {
+     "id": "mum",
+     "en": "mum",
+     "es": "mamá",
+     "vis": {
+      "t": "emoji",
+      "v": "👩"
+     }
+    },
+    {
+     "id": "dad",
+     "en": "dad",
+     "es": "papá",
+     "vis": {
+      "t": "emoji",
+      "v": "👨"
+     }
+    },
+    {
+     "id": "brother",
+     "en": "brother",
+     "es": "hermano",
+     "vis": {
+      "t": "emoji",
+      "v": "👦"
+     }
+    },
+    {
+     "id": "sister",
+     "en": "sister",
+     "es": "hermana",
+     "vis": {
+      "t": "emoji",
+      "v": "👧"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_this_is_my_mum",
+     "en": "This is my mum.",
+     "es": "Esta es mi mamá.",
+     "vis": {
+      "t": "emoji",
+      "v": "👩"
+     }
+    },
+    {
+     "id": "s_this_is_my_dad",
+     "en": "This is my dad.",
+     "es": "Este es mi papá.",
+     "vis": {
+      "t": "emoji",
+      "v": "👨"
+     }
+    },
+    {
+     "id": "s_he_is_my_brother",
+     "en": "He is my brother.",
+     "es": "Él es mi hermano.",
+     "vis": {
+      "t": "emoji",
+      "v": "👦"
+     }
+    },
+    {
+     "id": "s_she_is_my_sister",
+     "en": "She is my sister.",
+     "es": "Ella es mi hermana.",
+     "vis": {
+      "t": "emoji",
+      "v": "👧"
+     }
+    },
+    {
+     "id": "s_this_is_my_family",
+     "en": "This is my family.",
+     "es": "Esta es mi familia.",
+     "vis": {
+      "t": "emoji",
+      "v": "👨‍👩‍👧"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l9",
+   "title": "Yo puedo (can)",
+   "title_key": "title_l9",
+   "icon": "💪",
+   "items": [
+    {
+     "id": "can",
+     "en": "can",
+     "es": "poder / puedo",
+     "vis": {
+      "t": "emoji",
+      "v": "💪"
+     }
+    },
+    {
+     "id": "jump",
+     "en": "jump",
+     "es": "saltar",
+     "vis": {
+      "t": "emoji",
+      "v": "🦘"
+     }
+    },
+    {
+     "id": "run",
+     "en": "run",
+     "es": "correr",
+     "vis": {
+      "t": "emoji",
+      "v": "🏃"
+     }
+    },
+    {
+     "id": "swim",
+     "en": "swim",
+     "es": "nadar",
+     "vis": {
+      "t": "emoji",
+      "v": "🏊"
+     }
+    },
+    {
+     "id": "sing",
+     "en": "sing",
+     "es": "cantar",
+     "vis": {
+      "t": "emoji",
+      "v": "🎤"
+     }
+    },
+    {
+     "id": "dance",
+     "en": "dance",
+     "es": "bailar",
+     "vis": {
+      "t": "emoji",
+      "v": "💃"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_i_can_jump",
+     "en": "I can jump.",
+     "es": "Yo puedo saltar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🦘"
+     }
+    },
+    {
+     "id": "s_i_can_swim",
+     "en": "I can swim.",
+     "es": "Yo puedo nadar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🏊"
+     }
+    },
+    {
+     "id": "s_i_can_sing",
+     "en": "I can sing.",
+     "es": "Yo puedo cantar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎤"
+     }
+    },
+    {
+     "id": "s_i_can_dance",
+     "en": "I can dance.",
+     "es": "Yo puedo bailar.",
+     "vis": {
+      "t": "emoji",
+      "v": "💃"
+     }
+    },
+    {
+     "id": "s_she_can_run",
+     "en": "She can run.",
+     "es": "Ella puede correr.",
+     "vis": {
+      "t": "emoji",
+      "v": "🏃"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l10",
+   "title": "No puedo (can't)",
+   "title_key": "title_l10",
+   "icon": "🚫",
+   "items": [
+    {
+     "id": "cant",
+     "en": "can't",
+     "es": "no puedo / no puede",
+     "vis": {
+      "t": "emoji",
+      "v": "🚫"
+     }
+    },
+    {
+     "id": "fly",
+     "en": "fly",
+     "es": "volar",
+     "vis": {
+      "t": "emoji",
+      "v": "🦅"
+     }
+    },
+    {
+     "id": "read",
+     "en": "read",
+     "es": "leer",
+     "vis": {
+      "t": "emoji",
+      "v": "📖"
+     }
+    },
+    {
+     "id": "write",
+     "en": "write",
+     "es": "escribir",
+     "vis": {
+      "t": "emoji",
+      "v": "✏️"
+     }
+    },
+    {
+     "id": "play",
+     "en": "play",
+     "es": "jugar",
+     "vis": {
+      "t": "emoji",
+      "v": "🎮"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_i_cant_fly",
+     "en": "I can't fly.",
+     "es": "Yo no puedo volar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🦅"
+     }
+    },
+    {
+     "id": "s_he_cant_swim",
+     "en": "He can't swim.",
+     "es": "Él no puede nadar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🏊"
+     }
+    },
+    {
+     "id": "s_i_can_read",
+     "en": "I can read.",
+     "es": "Yo puedo leer.",
+     "vis": {
+      "t": "emoji",
+      "v": "📖"
+     }
+    },
+    {
+     "id": "s_i_can_write",
+     "en": "I can write.",
+     "es": "Yo puedo escribir.",
+     "vis": {
+      "t": "emoji",
+      "v": "✏️"
+     }
+    },
+    {
+     "id": "s_she_can_play",
+     "en": "She can play.",
+     "es": "Ella puede jugar.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎮"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l11",
+   "title": "Yo tengo (have got)",
+   "title_key": "title_l11",
+   "icon": "🎒",
+   "items": [
+    {
+     "id": "have_got",
+     "en": "have got",
+     "es": "tengo",
+     "vis": {
+      "t": "emoji",
+      "v": "🤲"
+     }
+    },
+    {
+     "id": "has_got",
+     "en": "has got",
+     "es": "tiene",
+     "vis": {
+      "t": "emoji",
+      "v": "🤲"
+     }
+    },
+    {
+     "id": "hat",
+     "en": "hat",
+     "es": "gorro",
+     "vis": {
+      "t": "emoji",
+      "v": "🎩"
+     }
+    },
+    {
+     "id": "book",
+     "en": "book",
+     "es": "libro",
+     "vis": {
+      "t": "emoji",
+      "v": "📚"
+     }
+    },
+    {
+     "id": "bag",
+     "en": "bag",
+     "es": "mochila",
+     "vis": {
+      "t": "emoji",
+      "v": "🎒"
+     }
+    },
+    {
+     "id": "pet",
+     "en": "pet",
+     "es": "mascota",
+     "vis": {
+      "t": "emoji",
+      "v": "🐾"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_i_have_got_a_hat",
+     "en": "I have got a hat.",
+     "es": "Yo tengo un gorro.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎩"
+     }
+    },
+    {
+     "id": "s_i_have_got_a_book",
+     "en": "I have got a book.",
+     "es": "Yo tengo un libro.",
+     "vis": {
+      "t": "emoji",
+      "v": "📚"
+     }
+    },
+    {
+     "id": "s_she_has_got_a_bag",
+     "en": "She has got a bag.",
+     "es": "Ella tiene una mochila.",
+     "vis": {
+      "t": "emoji",
+      "v": "🎒"
+     }
+    },
+    {
+     "id": "s_he_has_got_a_pet",
+     "en": "He has got a pet.",
+     "es": "Él tiene una mascota.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐾"
+     }
+    },
+    {
+     "id": "s_i_have_got_a_cat",
+     "en": "I have got a cat.",
+     "es": "Yo tengo un gato.",
+     "vis": {
+      "t": "emoji",
+      "v": "🐱"
+     }
+    }
+   ]
+  },
+  {
+   "id": "l12",
+   "title": "Me gusta (like)",
+   "title_key": "title_l12",
+   "icon": "❤️",
+   "items": [
+    {
+     "id": "like",
+     "en": "like",
+     "es": "gustar / me gusta",
+     "vis": {
+      "t": "emoji",
+      "v": "👍"
+     }
+    },
+    {
+     "id": "love",
+     "en": "love",
+     "es": "amar / me encanta",
+     "vis": {
+      "t": "emoji",
+      "v": "❤️"
+     }
+    },
+    {
+     "id": "pizza",
+     "en": "pizza",
+     "es": "pizza",
+     "vis": {
+      "t": "emoji",
+      "v": "🍕"
+     }
+    },
+    {
+     "id": "ice_cream",
+     "en": "ice cream",
+     "es": "helado",
+     "vis": {
+      "t": "emoji",
+      "v": "🍦"
+     }
+    },
+    {
+     "id": "apple",
+     "en": "apple",
+     "es": "manzana",
+     "vis": {
+      "t": "emoji",
+      "v": "🍎"
+     }
+    },
+    {
+     "id": "cake",
+     "en": "cake",
+     "es": "tarta",
+     "vis": {
+      "t": "emoji",
+      "v": "🍰"
+     }
+    }
+   ],
+   "sentences": [
+    {
+     "id": "s_i_like_pizza",
+     "en": "I like pizza.",
+     "es": "Me gusta la pizza.",
+     "vis": {
+      "t": "emoji",
+      "v": "🍕"
+     }
+    },
+    {
+     "id": "s_i_love_ice_cream",
+     "en": "I love ice cream.",
+     "es": "Me encanta el helado.",
+     "vis": {
+      "t": "emoji",
+      "v": "🍦"
+     }
+    },
+    {
+     "id": "s_i_like_apples",
+     "en": "I like apples.",
+     "es": "Me gustan las manzanas.",
+     "vis": {
+      "t": "emoji",
+      "v": "🍎"
+     }
+    },
+    {
+     "id": "s_she_likes_cake",
+     "en": "She likes cake.",
+     "es": "A ella le gusta la tarta.",
+     "vis": {
+      "t": "emoji",
+      "v": "🍰"
+     }
+    },
+    {
+     "id": "s_he_loves_pizza",
+     "en": "He loves pizza.",
+     "es": "A él le encanta la pizza.",
+     "vis": {
+      "t": "emoji",
+      "v": "🍕"
      }
     }
    ]

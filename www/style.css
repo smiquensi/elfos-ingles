@@ -93,3 +93,68 @@ h2{font-size:clamp(20px,3.6vw,26px);margin:.3em 0}
 .hint{font-weight:800;color:#4a3a8f;font-size:clamp(16px,3.8vw,22px);margin:10px 0}
 .micring{display:inline-block;margin:14px 0;padding:16px 26px;border-radius:999px;background:#ffe3ec;color:#c2185b;font-weight:900;font-size:22px;animation:micp 1s ease-in-out infinite}
 @keyframes micp{0%,100%{transform:scale(1);box-shadow:0 0 0 0 #f48fb180}50%{transform:scale(1.06);box-shadow:0 0 0 16px #f48fb100}}
+
+/* ===== travesuras (reel 9:16) ===== */
+.pv{display:flex;flex-direction:column;align-items:center;line-height:1}.pv small{font-size:.45em;margin-top:2px}
+.reelw{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:6px;box-sizing:border-box}
+.reel{position:relative;container-type:size;width:min(96vw,calc(94vh * 9 / 16));aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:#222;box-shadow:0 10px 40px #0008;touch-action:pan-y}
+.reel .sc{position:absolute;inset:0;overflow:hidden}
+.reel .wall{position:absolute;inset:0 0 28% 0}.reel .w1{background:linear-gradient(#ffd9e6,#ffc2d8)}.reel .w2{background:linear-gradient(#fff3c4,#ffe39a)}.reel .w3{background:linear-gradient(#d9e8ff,#b9d2ff)}.reel .w4{inset:0;background:linear-gradient(#3a2a6b,#7a4fa8)}
+.reel .floor{position:absolute;inset:72% 0 0 0;background:linear-gradient(#b5835a,#8d5f3b)}.reel .f3{background:linear-gradient(#e9b8d4,#c98fb4)}
+.reel .win{position:absolute;left:7%;top:8%;width:28cqw;height:32cqw;border:2cqw solid #fff;border-radius:3cqw;background:#bfe6ff;font-size:12cqw;text-align:center;line-height:32cqw}
+.reel .tree{position:absolute;left:50%;top:28%;transform:translateX(-50%);font-size:68cqw;line-height:1}
+.reel .tpw{position:absolute;left:26%;width:48cqw;height:4.4cqw;background:#fff;border-radius:2cqw;box-shadow:0 .6cqw 0 #ddd;opacity:0;animation:pkIn .5s both}
+@keyframes pkIn{from{opacity:0;transform:rotate(var(--r)) scaleX(0)}to{opacity:1;transform:rotate(var(--r)) scaleX(1)}}
+.reel .actor{position:absolute}.reel .actor svg{width:100%;height:auto;display:block}
+.reel .tpA{bottom:17%;left:-32cqw;animation:pkRun 7s ease-in-out both}
+@keyframes pkRun{0%{left:-32cqw}15%{left:6cqw}35%{left:62cqw;transform:scaleX(-1)}55%{left:6cqw;transform:scaleX(1)}75%{left:62cqw;transform:scaleX(-1)}100%{left:34cqw;transform:scaleX(1)}}
+.reel .roll{position:absolute;right:-9cqw;top:42%;font-size:10cqw;animation:pkSpin .6s linear infinite}@keyframes pkSpin{to{transform:rotate(360deg)}}
+.reel .bub{position:absolute;padding:2cqw 4.5cqw;background:#fff;border-radius:5cqw;font-weight:900;font-size:5.6cqw;color:#5b2a86;opacity:0;animation:pkPop .5s 7.2s both;box-shadow:0 1cqw 0 #0002;white-space:nowrap}
+.reel .b-tp{left:22%;top:20%}.reel .b-flour{left:14%;top:36%}.reel .b-mustache{left:10%;top:10%}.reel .b-candy{left:14%;top:46%}
+@keyframes pkPop{0%{opacity:0;transform:scale(.3)}70%{transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+/* harina */
+.reel .shelf{position:absolute;left:0;right:0;top:21%;height:3cqw;background:#8d5f3b}
+.reel .flA{left:10%;top:3%;width:27cqw}
+.reel .bowl{position:absolute;left:40%;top:10.5%;font-size:15cqw;line-height:1;transform-origin:20% 90%;animation:pkTip 1s 2s both}
+@keyframes pkTip{from{transform:rotate(0)}to{transform:rotate(-115deg)}}
+.reel .fl{position:absolute;left:46%;top:16%;width:3.2cqw;height:3.2cqw;border-radius:50%;background:#fff;opacity:0;animation:pkFall 1.6s both}
+@keyframes pkFall{0%{opacity:0;top:16%}10%{opacity:1}100%{opacity:1;top:76%;transform:translateX(var(--x))}}
+.reel .petw{position:absolute;left:44%;bottom:17%;width:44cqw;transform:translateX(-50%);animation:pkShake .5s 6.3s 2}
+.reel .petw svg{width:100%;height:auto;display:block}.reel .petw span{display:block;text-align:center;line-height:1}
+@keyframes pkShake{0%,100%{transform:translateX(-50%) rotate(0)}30%{transform:translateX(-50%) rotate(-9deg)}70%{transform:translateX(-50%) rotate(9deg)}}
+.reel .snowc{position:absolute;left:44%;bottom:14%;width:56cqw;height:44cqw;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#fff 30%,#ffffffd0 55%,transparent 72%);opacity:0;animation:pkFade 3s 3.4s both}
+@keyframes pkFade{to{opacity:.95}}
+/* bigotes */
+.reel .ted{position:absolute;left:50%;top:24%;transform:translateX(-50%);font-size:62cqw;line-height:1;animation:pkJump .5s 4.8s both}
+@keyframes pkJump{40%{transform:translateX(-50%) translateY(-6cqw)}100%{transform:translateX(-50%)}}
+.reel .zz{position:absolute;left:66%;top:20%;font-size:10cqw;animation:pkFloat 1.6s ease-in-out infinite}@keyframes pkFloat{50%{transform:translateY(-3cqw)}}
+.reel .mus{position:absolute;left:50%;top:37%;width:22cqw;transform:translateX(-50%)}
+.reel .mus path{fill:#1c1c1c;fill-opacity:0;stroke:#1c1c1c;stroke-width:5;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;animation:pkDraw 1.4s 2.2s forwards,pkFill .4s 3.5s forwards}
+@keyframes pkDraw{to{stroke-dashoffset:0}}@keyframes pkFill{to{fill-opacity:1}}
+.reel .pen{position:absolute;font-size:12cqw;line-height:1;left:92%;top:78%;animation:pkPen 2.6s 1.2s both}
+@keyframes pkPen{0%{left:92%;top:78%}30%{left:60%;top:42%}55%{left:40%;top:40%}75%{left:60%;top:42%}100%{left:92%;top:80%}}
+.reel .wow{position:absolute;left:46%;top:14%;font-size:14cqw;opacity:0;animation:pkPop .4s 4.8s both}
+.reel .muA{left:6%;bottom:-2%;width:30cqw;transform:translateY(110%);animation:pkPeek .6s .5s both}
+@keyframes pkPeek{to{transform:translateY(0)}}
+/* caramelos */
+.reel .lamp{position:absolute;left:50%;top:0;transform:translateX(-50%);font-size:12cqw;line-height:1}
+.reel .swing{position:absolute;left:50%;top:6cqw;width:0;height:0;transform-origin:50% 0;animation:pkSw 1.5s ease-in-out infinite alternate}
+@keyframes pkSw{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
+.reel .cord{position:absolute;left:-.5cqw;top:0;width:1cqw;height:22cqw;background:#ddd}
+.reel .caA{left:-14cqw;top:20cqw}
+.reel .cd{position:absolute;top:-10%;font-style:normal;font-size:8cqw;opacity:0;animation:pkCd 1.9s both}
+@keyframes pkCd{0%{opacity:1;top:-10%;transform:rotate(0)}100%{opacity:1;top:var(--t);transform:rotate(540deg)}}
+.reel .pile{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#ff8fb8,#ffd166);border-radius:30% 30% 0 0;animation:pkPile 6s 2s both}
+@keyframes pkPile{to{height:20%}}
+/* interfaz reel */
+.reel .rbar{position:absolute;left:3cqw;right:3cqw;top:2.5cqw;height:1.4cqw;background:#fff5;border-radius:1cqw;z-index:3;overflow:hidden}
+.reel .rbar i{display:block;height:100%;background:#fff;animation:pkBar 9.2s linear both}@keyframes pkBar{from{width:0}to{width:100%}}
+.reel .rx{position:absolute;left:3cqw;top:6cqw;z-index:4;width:11cqw;height:11cqw;border-radius:50%;border:0;background:#0006;color:#fff;font-size:6cqw}
+.reel .rside{position:absolute;right:3cqw;bottom:20cqw;z-index:4;display:flex;flex-direction:column;gap:3cqw}
+.reel .rside button{position:relative;width:13cqw;min-height:13cqw;border-radius:50%;border:0;background:#0006;color:#fff;font-size:7cqw;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.reel .rside b{font-size:3.4cqw}
+.reel .heart{position:absolute;left:25%;top:-30%;font-size:8cqw;animation:pkHeart .9s ease-out forwards;pointer-events:none}@keyframes pkHeart{to{transform:translateY(-22cqw) scale(1.6);opacity:0}}
+.reel .rinfo{position:absolute;left:4cqw;right:22cqw;bottom:4cqw;z-index:4;color:#fff;display:flex;flex-direction:column;gap:1cqw;text-shadow:0 .4cqw 1.2cqw #000;font-size:4.4cqw;background:linear-gradient(transparent,#0007);padding:4cqw 2cqw 0}
+.reel .rinfo small{font-size:3.6cqw;opacity:.9}
+.reel .rend{position:absolute;inset:0;z-index:5;background:#000a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3cqw;visibility:hidden;animation:pkEnd .4s 9.4s both}
+@keyframes pkEnd{from{visibility:visible;opacity:0}to{visibility:visible;opacity:1}}

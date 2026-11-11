@@ -39,8 +39,14 @@ const CAT = [
   { id: 'pet_rayo', cat: 'pet', kind: 'Cat', color: '#FFD84D', name: 'Rayo', r: 'e' },
   { id: 'pet_brote', cat: 'pet', kind: 'Sprout', color: '#A7E3A1', name: 'Brote', r: 'e' }
 ];
+CAT.push(
+  { id: 'prank_tp', cat: 'prank', scene: 'tp', ico: '🧻', name: 'Travesura: el árbol de papel', r: 'r' },
+  { id: 'prank_flour', cat: 'prank', scene: 'flour', ico: '☁️', name: 'Travesura: nevada de harina', r: 'r' },
+  { id: 'prank_mustache', cat: 'prank', scene: 'mustache', ico: '🖊️', name: 'Travesura: bigotes a escondidas', r: 'r' },
+  { id: 'prank_candy', cat: 'prank', scene: 'candy', ico: '🍬', name: 'Travesura: lluvia de caramelos', r: 'e' }
+);
 const RAR = { c: ['Común', 6], r: ['Especial', 3], e: ['¡Épico!', 1] };
-const CATN = { hat: 'Gorros', outfit: 'Ropa', hair: 'Pelo', friend: 'Amigos', pet: 'Mascotas' };
+const CATN = { hat: 'Gorros', outfit: 'Ropa', hair: 'Pelo', friend: 'Amigos', pet: 'Mascotas', prank: 'Travesuras 🎬' };
 const PRE = {
   pipo: { skin: '#E8B88A', hair: '#8B4A1F', hairStyle: 'short', eye: '#3A2A4A', eyes: 'Round', mouth: 'Cat', cloth: '#2E9E5B', body: 'Elf', hat: 'Elf', hatColor: '#E04545' },
   luna: { skin: '#FFE3CF', hair: '#3A2A6B', hairStyle: 'bob', eye: '#3A2A4A', eyes: 'Happy', mouth: 'Smile', cloth: '#8E5CF0', body: 'Pop', hat: 'Pop', hatColor: '#FF7BAC' },
@@ -110,6 +116,7 @@ function vis(v, big) {
   return '';
 }
 function preview(it, w) {
+  if (it.cat === 'prank') return `<div class="pv" style="font-size:${Math.round(w * .62)}px">🎬<small>${it.ico}</small></div>`;
   if (it.cat === 'friend') return elfSVG(PRE[it.id], w);
   if (it.cat === 'pet') return petSVG(it.kind, it.color, w);
   const c = effCfg();
@@ -155,7 +162,22 @@ async function sayUI(cat, esKeys, enKeys) {
 }
 async function ins(s, kind, es, en) { s.said = s.said || {}; if (s.said[kind]) return; s.said[kind] = 1; await sayUI('i_' + kind, [es], [en]); }
 async function praise(s) { s.ok = (s.ok || 0) + 1; if (s.ok % 3 === 1) await sayUI('p', ['great', 'great2', 'great3', 'great4', 'great5', 'great6'], ['praise1', 'praise2', 'praise3', 'praise4', 'praise5', 'praise6']); }
-const sfx = { ok: () => tone([660, 880], .1), bad: () => tone([220, 180], .15, 'sine', .12), win: () => tone([523, 659, 784, 1047], .12), box: () => tone([392, 523, 659, 784, 1047, 1319], .09) };
+/* sonidos tipo "campanita" (como Duolingo): suben de tono con cada acierto seguido */
+function bell(f, d, dur, vol) {
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const t = AC.currentTime + d;
+    [[1, 1], [2, .35], [3, .12]].forEach(([m, g]) => { const o = AC.createOscillator(), gn = AC.createGain(); o.type = 'sine'; o.frequency.value = f * m; o.connect(gn); gn.connect(AC.destination);
+      gn.gain.setValueAtTime(.0001, t); gn.gain.exponentialRampToValueAtTime((vol || .18) * g, t + .01); gn.gain.exponentialRampToValueAtTime(.0001, t + dur); o.start(t); o.stop(t + dur + .05); });
+  } catch (e) {}
+}
+const NOTAS = [523.25, 587.33, 659.25, 783.99, 880, 987.77, 1046.5, 1174.66];
+const sfx = {
+  ok: () => { const s = ui && ui.sess; const n = s ? (s.streak = (s.streak || 0) + 1) : 1, f = NOTAS[Math.min(n - 1, NOTAS.length - 1)]; bell(f, 0, .5); bell(f * 1.5, .09, .7, .2); if (n >= 3) bell(f * 2, .18, .8, .14); },
+  bad: () => { tone([220, 180], .15, 'sine', .12); },
+  win: () => { [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((f, i) => bell(f, i * .11, .9, .16)); bell(2093, .7, 1.2, .1); },
+  box: () => { [392, 523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => bell(f, i * .08, .8, .14)); }
+};
 /* ---------- comprobación de lectura (micrófono, solo en la app Android) ---------- */
 const SRn = (m, o) => window.Capacitor.nativePromise('SpeechRecognition', m, o);
 let MIC = false;
@@ -276,7 +298,7 @@ async function enterQ(first) {
   else if (q.k === 'build') { await ins(s, 'build', 'build', 'build'); if (curQ() === q) sayEn(q.it.en); }
   else if (q.k === 'say') { q.tries = 0; q.st = ''; if (MIC) { await ins(s, 'say', 'readaloud', 'readaloud'); } else { await ins(s, 'say', 'repeat', 'repeat'); if (curQ() === q) sayEn(q.it.en); } }
 }
-function miss(q) { const s = ui.sess; s.miss[q.it.id] = (s.miss[q.it.id] || 0) + 1; s.misses = (s.misses || 0) + 1; if (!q.retried && s.queue.length < s.total + 6) { s.queue.push({ k: q.k, it: q.it, L: q.L, retried: 1 }); } snap(); }
+function miss(q) { const s = ui.sess; s.streak = 0; s.miss[q.it.id] = (s.miss[q.it.id] || 0) + 1; s.misses = (s.misses || 0) + 1; if (!q.retried && s.queue.length < s.total + 6) { s.queue.push({ k: q.k, it: q.it, L: q.L, retried: 1 }); } snap(); }
 async function correct(q) {
   q.locked = true; sfx.ok(); clap();
   await praise(ui.sess);
@@ -292,16 +314,18 @@ async function finish() {
   const ids = new Set(s.queue.filter(q => q.k !== 'learn').map(q => q.it.id));
   ids.forEach(id => grade(id, !s.miss[id]));
   const m = s.misses || 0, stars = m <= 1 ? 3 : m <= 4 ? 2 : 1;
-  let gotBox = false;
+  let gotBox = false; const sp0 = S.sparkles;
   const readLow = !!s.readTot && (s.readOk || 0) / s.readTot < .5; // ha leído poco: sin caja ni lección nueva
   if (readLow) { S.sparkles += 1; }
   else if (s.kind === 'lesson') {
     const first = !S.done[s.L.id];
+    if (first) S.nt = { d: today(), n: newToday() + 1 };
     S.done[s.L.id] = true; S.stars[s.L.id] = Math.max(S.stars[s.L.id] || 0, stars);
     if (first || stars === 3) { S.boxes++; gotBox = true; } else S.sparkles += 3;
   } else if (S.claimed !== today()) { S.claimed = today(); S.boxes++; gotBox = true; } else S.sparkles += 2;
+  const conv = convertSparks(), gain = S.sparkles - sp0 + conv * SPARK_BOX;
   S.sess = null; save();
-  ui = { screen: 'result', kind: s.kind, stars, gotBox, readLow };
+  ui = { screen: 'result', kind: s.kind, stars, gotBox: gotBox || conv > 0, readLow, conv, gain: gotBox ? 0 : gain };
   render(); sfx.win(); confetti();
   if (readLow) await sayUI('r', ['readlow'], ['readlow']); else await sayEs(s.kind === 'review' ? 'review_done' : 'lesson_done');
 }
@@ -329,7 +353,7 @@ function clap() {
 /* ---------- vistas ---------- */
 function btnSpk(label) { return `<button class="spk" data-act="spk" aria-label="Escuchar">🔊</button>`; }
 function topBar(extra) {
-  return `<div class="top"><div class="chip">🧝 ${esc(S.name)}</div><div style="display:flex;gap:8px"><span class="chip">✨ ${S.sparkles}</span>${extra || ''}</div></div>`;
+  return `<div class="top"><div class="chip">🧝 ${esc(S.name)}</div><div style="display:flex;gap:8px"><button class="chip" data-act="sparks" aria-label="Polvo de estrellas">✨ ${S.sparkles}/${SPARK_BOX}</button>${extra || ''}</div></div>`;
 }
 function vWelcome() {
   if (ui.wstep === 'name') return `<div class="card center"><h1>Elfos del Inglés</h1><p style="font-size:22px">¿Cómo te llamas?</p><input id="nm" class="inp" maxlength="14" autocomplete="off" value="${esc(ui.nm)}" aria-label="Tu nombre"><div class="err">${esc(ui.err)}</div><button class="btn big" data-act="wname">Siguiente</button></div>`;
@@ -338,16 +362,20 @@ function vWelcome() {
   const tb = (arr, key) => arr.map(([v, n]) => `<button class="tab ${c[key] === v ? 'on' : ''}" data-act="cfg" data-k="${key}" data-v="${v}">${n}</button>`).join('');
   return `<div class="card center"><h2>¡Crea tu elfo, ${esc(ui.nm)}!</h2>${elfSVG(c, 170)}<p><b>Piel</b></p><div class="tabs" style="justify-content:center">${sw(SKINS, 'skin')}</div><p><b>Peinado</b></p><div class="tabs" style="justify-content:center">${tb(STYLES, 'hairStyle')}</div><p><b>Color de pelo</b></p><div class="tabs" style="justify-content:center">${sw(HAIRS, 'hair')}</div><p><b>Ojos</b></p><div class="tabs" style="justify-content:center">${tb(EYES, 'eyes')}</div><button class="btn big" data-act="wdone">¡Listo!</button></div>`;
 }
+const SPARK_BOX = 10; // 10 polvos de estrellas = 1 caja sorpresa
+function convertSparks() { let n = 0; while (S.sparkles >= SPARK_BOX) { S.sparkles -= SPARK_BOX; S.boxes++; n++; } return n; }
+const DAILY_NEW = 2; // lecciones NUEVAS por día (repetir y repasar siempre se puede)
+const newToday = () => (S.nt && S.nt.d === today()) ? S.nt.n : 0;
 function vHome() {
   const e = S.eq, due = dueIds().length;
   const fr = e.friend ? `<div class="fr">${elfSVG(PRE[e.friend], 100)}</div>` : '', pt = e.pet ? (() => { const p = catItem(e.pet); return `<div class="pt">${petSVG(p.kind, p.color, 90)}</div>`; })() : '';
   const lessons = C.lessons.map((L, i) => {
-    const lock = i > 0 && !S.done[C.lessons[i - 1].id], st = S.stars[L.id] || 0;
-    return `<button class="lesson ${lock ? 'lock' : ''}" data-act="lesson" data-id="${L.id}" ${lock ? 'disabled' : ''}><span class="ic">${L.icon}</span><span><b>${i + 1}. ${esc(L.title)}</b><small>${lock ? 'Se abre al terminar la anterior' : S.done[L.id] ? 'Repetir' : '¡Empezar!'}</small></span><span class="st">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`;
+    const lock0 = i > 0 && !S.done[C.lessons[i - 1].id], cap = !lock0 && !S.done[L.id] && newToday() >= DAILY_NEW, lock = lock0 || cap, st = S.stars[L.id] || 0;
+    return `<button class="lesson ${lock ? 'lock' : ''}" data-act="lesson" data-id="${L.id}" ${lock ? 'disabled' : ''}><span class="ic">${L.icon}</span><span><b>${i + 1}. ${esc(L.title)}</b><small>${cap ? '🌙 ¡Hoy ya has hecho 2 nuevas! Sigue mañana' : lock ? 'Se abre al terminar la anterior' : S.done[L.id] ? 'Repetir' : '¡Empezar!'}</small></span><span class="st">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></button>`;
   }).join('');
   return `${topBar(`<span class="chip">🎁 ${S.boxes}</span>`)}<div class="home"><div><div class="stage"><div class="hello">¡Hola, ${esc(S.name)}!</div><div class="scene">${fr}<div class="me">${elfSVG(effCfg(), 190)}</div>${pt}</div></div>
   <div class="row"><button class="btn alt" data-act="closet">👗 Armario</button><button class="btn ${due ? 'green' : 'alt'}" data-act="review" ${due ? '' : 'disabled'}>🔁 Repaso${due ? `<span class="badge">${due}</span>` : ' ✓'}</button></div></div>
-  <div class="path">${restoreSess() ? `<button class="gift" data-act="resume">▶️ Seguir donde lo dejaste</button>` : ''}${S.boxes ? `<button class="gift" data-act="box">🎁 ¡Tienes ${S.boxes} caja${S.boxes > 1 ? 's' : ''} sorpresa!</button>` : ''}${lessons}</div></div><button class="gear" data-act="gear" aria-label="Opciones">⚙</button>`;
+  <div class="path">${prOwned().length ? '<button class="gift" data-act="pranks">🎬 ¡Mis travesuras de elfos!</button>' : ''}${restoreSess() ? `<button class="gift" data-act="resume">▶️ Seguir donde lo dejaste</button>` : ''}${S.boxes ? `<button class="gift" data-act="box">🎁 ¡Tienes ${S.boxes} caja${S.boxes > 1 ? 's' : ''} sorpresa!</button>` : ''}${lessons}</div></div><button class="gear" data-act="gear" aria-label="Opciones">⚙</button>`;
 }
 function vSess() {
   const s = ui.sess, q = curQ(), pct = Math.round(s.i / s.queue.length * 100);
@@ -372,14 +400,14 @@ function vSess() {
 }
 function vResult() {
   const r = ui;
-  return `<div class="card center"><h1>${r.readLow ? '¡Casi lo tienes!' : r.kind === 'review' ? '¡Repaso hecho!' : '¡Lección completada!'}</h1><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(3 - r.stars)}</div>${r.readLow ? '<p style="font-size:20px">🗣️ Lee en voz alta un poquito mejor para abrir la caja y la siguiente lección. ¡Tú puedes!</p>' : r.gotBox ? '<div style="font-size:90px">🎁</div><p style="font-size:20px">¡Has ganado una caja sorpresa!</p>' : '<p style="font-size:20px">✨ ¡Has ganado polvo de brillo!</p>'}<div class="row">${r.gotBox ? '<button class="btn green" data-act="box">Abrir caja 🎁</button>' : ''}<button class="btn alt" data-act="home">Inicio</button></div></div>`;
+  return `<div class="card center"><h1>${r.readLow ? '¡Casi lo tienes!' : r.kind === 'review' ? '¡Repaso hecho!' : '¡Lección completada!'}</h1><div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(3 - r.stars)}</div>${r.readLow ? '<p style="font-size:20px">🗣️ Lee en voz alta un poquito mejor para abrir la caja y la siguiente lección. ¡Tú puedes!</p>' : r.gotBox ? '<div style="font-size:90px">🎁</div><p style="font-size:20px">¡Has ganado una caja sorpresa!</p>' : `<p style="font-size:20px">✨ ¡+${r.gain} polvo de estrellas! Llevas ${S.sparkles}/${SPARK_BOX}<br><small>Con ${SPARK_BOX} te regalo una caja sorpresa 🎁</small></p>`}<div class="row">${r.gotBox ? '<button class="btn green" data-act="box">Abrir caja 🎁</button>' : ''}<button class="btn alt" data-act="home">Inicio</button></div></div>`;
 }
 function vBox() {
   const b = ui.box;
   if (b.stage === 'closed') return `${topBar()}<div class="card center"><h2>¡Caja sorpresa!</h2><button class="giftbox ${b.shake ? 'shake' : ''}" data-act="openbox" aria-label="Abrir caja">🎁</button><p style="font-size:20px">Toca la caja para abrirla</p><button class="btn alt" data-act="home">Más tarde</button></div>`;
   const it = b.item;
   if (!it) return `<div class="card center"><h2>¡Lo tienes todo!</h2><p style="font-size:22px">✨ +5 polvo de brillo</p><button class="btn big" data-act="home">Inicio</button></div>`;
-  return `<div class="card center reveal"><span class="rar ${it.r}">${RAR[it.r][0]}</span><h2>¡${esc(it.name)}!</h2><div>${preview(it, 190)}</div><div class="row"><button class="btn green" data-act="equip" data-id="${it.id}">¡Ponérmelo!</button><button class="btn alt" data-act="${S.boxes ? 'box' : 'home'}">${S.boxes ? 'Otra caja 🎁' : 'Seguir'}</button></div></div>`;
+  return `<div class="card center reveal"><span class="rar ${it.r}">${RAR[it.r][0]}</span><h2>¡${esc(it.name)}!</h2><div>${preview(it, 190)}</div><div class="row"><button class="btn green" data-act="equip" data-id="${it.id}">${it.cat === 'prank' ? '🎬 ¡Verla!' : '¡Ponérmelo!'}</button><button class="btn alt" data-act="${S.boxes ? 'box' : 'home'}">${S.boxes ? 'Otra caja 🎁' : 'Seguir'}</button></div></div>`;
 }
 function vCloset() {
   const t = ui.tab || 'hat', items = CAT.filter(x => x.cat === t && !x.base || (t === 'outfit' && x.base));
@@ -395,21 +423,70 @@ function render() {
   if (ui.screen === 'welcome') h = vWelcome();
   else if (ui.screen === 'home') h = vHome();
   else if (ui.screen === 'sess') h = vSess();
+  else if (ui.screen === 'prank') h = vPrank();
   else if (ui.screen === 'result') h = vResult();
   else if (ui.screen === 'box') h = vBox();
   else if (ui.screen === 'closet') h = vCloset();
-  a.innerHTML = h + (ui.gear ? gearHTML() : '');
+  a.innerHTML = h + (ui.gear ? gearHTML() : '') + (ui.spk ? sparkHTML() : '');
   syncMascot();
+}
+function sparkHTML() {
+  const pct = Math.round(S.sparkles / SPARK_BOX * 100);
+  return `<div class="ov"><div class="card center"><h2>✨ Polvo de estrellas</h2><div style="font-size:54px">✨🧝✨</div><p style="font-size:20px">Tienes <b>${S.sparkles}</b> de ${SPARK_BOX}.<br>¡Con ${SPARK_BOX} se convierten en una <b>caja sorpresa</b> 🎁!</p><div class="prog" style="height:18px;margin:8px 0 16px"><i style="width:${pct}%"></i></div><p style="font-size:16px">Ganas polvo repitiendo lecciones y repasando.</p><button class="btn" data-act="sclose">¡Vale!</button></div></div>`;
 }
 function gearHTML() {
   return `<div class="ov"><div class="card"><h2>Opciones para padres</h2><button class="btn alt" data-act="gday">▶ Avanzar un día (probar el repaso) · día +${S.dayOff}</button><button class="btn alt" data-act="gbox">🎁 Regalar una caja</button><button class="btn alt" data-act="gall">🔓 Completar todas las lecciones</button><button class="btn alt" data-act="greset">🗑 Borrar todo el progreso</button><button class="btn" data-act="gclose">Cerrar</button></div></div>`;
 }
 
+/* ---------- travesuras de elfos (formato reel) ---------- */
+const PR = {
+  tp: { n: 'El árbol de papel', t: '#elfos #travesuras #navidad', bub: '¡Ji, ji, ji! 😆' },
+  flour: { n: 'Nevada de harina', t: '#elfos #travesuras #nieve', bub: '¡Nevada sorpresa! ❄️' },
+  mustache: { n: 'Bigotes a escondidas', t: '#elfos #travesuras #bigotes', bub: '¡Shhh! 🤭' },
+  candy: { n: 'Lluvia de caramelos', t: '#elfos #travesuras #caramelos', bub: '¡Dulce travesura! 🍭' }
+};
+let prT = [];
+const prClear = () => { prT.forEach(clearTimeout); prT = []; };
+const prOwned = () => CAT.filter(x => x.cat === 'prank' && S.owned.includes(x.id));
+const prActor = (cls, w, extra) => `<div class="actor ${cls}" style="width:${w}cqw">${elfSVG(effCfg(), 200)}${extra || ''}</div>`;
+const prPet = () => { const p = S.eq.pet && catItem(S.eq.pet); return p ? petSVG(p.kind, p.color, 160) : '<span style="font-size:30cqw">🐶</span>'; };
+function prScene(sc) {
+  const bub = `<div class="bub b-${sc}">${PR[sc].bub}</div>`;
+  if (sc === 'tp') return `<div class="sc"><div class="wall w1"></div><div class="floor"></div><div class="win">❄️</div><div class="tree">🎄</div>${[0, 1, 2, 3, 4, 5].map(i => `<i class="tpw" style="top:${38 + i * 8}%;--r:${i % 2 ? 6 : -6}deg;animation-delay:${2 + i * .8}s;transform-origin:${i % 2 ? 'right' : 'left'}"></i>`).join('')}${prActor('tpA', 30, '<span class="roll">🧻</span>')}${bub}</div>`;
+  if (sc === 'flour') return `<div class="sc"><div class="wall w2"></div><div class="floor"></div><div class="shelf"></div>${prActor('flA', 26)}<div class="bowl">🥣</div>${Array.from({ length: 16 }, (_, i) => `<i class="fl" style="--x:${(i % 5 - 2) * 3}cqw;animation-delay:${3 + i * .1}s"></i>`).join('')}<div class="petw">${prPet()}</div><div class="snowc"></div>${bub}</div>`;
+  if (sc === 'mustache') return `<div class="sc"><div class="wall w3"></div><div class="floor f3"></div><div class="ted">🧸</div><div class="zz">💤</div><svg class="mus" viewBox="0 0 100 40"><path pathLength="100" d="M6 26 Q24 4 50 22 Q76 4 94 26 Q76 20 50 34 Q24 20 6 26Z"/></svg><div class="pen">🖊️</div><div class="wow">😲</div>${prActor('muA', 30)}${bub}</div>`;
+  return `<div class="sc"><div class="wall w4"></div><div class="lamp">💡</div><div class="swing"><i class="cord"></i>${prActor('caA', 28)}</div>${Array.from({ length: 18 }, (_, i) => `<i class="cd" style="left:${6 + (i * 37) % 86}%;--t:${74 + (i * 7) % 12}%;animation-delay:${2 + i * .3}s">${['🍬', '🍭', '🍫', '🍬'][i % 4]}</i>`).join('')}<div class="pile"></div>${bub}</div>`;
+}
+function vPrank() {
+  const m = PR[ui.id], many = prOwned().length > 1;
+  return `<div class="reelw"><div class="reel" data-sc="${ui.id}"><div class="rbar"><i></i></div>${prScene(ui.id)}<button class="rx" data-act="pclose" aria-label="Cerrar">✕</button><div class="rside"><button data-act="plike" aria-label="Me gusta">❤️<b>${ui.likes}</b></button><button data-act="preplay" aria-label="Otra vez">🔁</button>${many ? '<button data-act="pnext" aria-label="Siguiente">⏭</button>' : ''}</div><div class="rinfo"><b>@${esc(S.name.toLowerCase())}_elfa 🧝</b><span>Travesura: ${m.n}</span><small>${m.t}</small></div><div class="rend"><button class="btn big" data-act="preplay">🔁 Otra vez</button>${many ? '<button class="btn alt" data-act="pnext">⏭ Otra travesura</button>' : ''}<button class="btn alt" data-act="pclose">Cerrar</button></div></div></div>`;
+}
+function prStart() {
+  const id = ui.id, T = (ms, f) => prT.push(setTimeout(() => { if (ui && ui.screen === 'prank' && ui.id === id) f(); }, ms));
+  say('es:prank');
+  if (id === 'tp') [1500, 3300, 5100].forEach(t => T(t, () => tone([392, 587, 784], .07)));
+  if (id === 'flour') { T(2300, () => tone([300, 220], .12, 'sine')); [3200, 3900, 4600, 5300].forEach(t => T(t, () => tone([700, 900], .05))); }
+  if (id === 'mustache') [2400, 2800, 3200].forEach(t => T(t, () => tone([180, 240, 200], .05, 'sawtooth', .05)));
+  if (id === 'candy') for (let t = 2200; t < 7500; t += 450) T(t, () => tone([900 + Math.random() * 600], .05));
+  T(7000, () => { say('es:giggle'); });
+  T(7300, () => sfx.win());
+}
+function playPrank(id, from) { stopAudio(); prClear(); ui = { screen: 'prank', id, from: from || 'home', likes: ui && ui.likes || 0 }; render(); prStart(); }
+function prLeave() { prClear(); stopAudio(); const f = ui.from; ui = f === 'closet' ? { screen: 'closet', tab: 'prank' } : { screen: 'home' }; render(); }
+function prMove(d) { const o = prOwned(); if (!o.length) return; const i = Math.max(0, o.findIndex(x => x.scene === ui.id)); playPrank(o[(i + d + o.length) % o.length].scene, ui.from); }
+let tY = null;
+document.addEventListener('touchstart', e => { tY = ui && ui.screen === 'prank' ? e.touches[0].clientY : null; }, { passive: true });
+document.addEventListener('touchend', e => { if (tY == null || !(ui && ui.screen === 'prank')) return; const d = e.changedTouches[0].clientY - tY; tY = null; if (Math.abs(d) > 70) prMove(d < 0 ? 1 : -1); }, { passive: true });
+
 /* ---------- caja ---------- */
 function roll() {
-  const un = CAT.filter(x => !x.base && !S.owned.includes(x.id));
+  const hue = h => { const n = parseInt((h || '#000000').slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (d < .08) return -1; return ((mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60 + 360) % 360; };
+  const parecido = (a, b) => { const x = hue(a), y = hue(b); if (x < 0 || y < 0) return x === y; const dd = Math.abs(x - y); return Math.min(dd, 360 - dd) < 18; };
+  const mismo = x => x.cat === 'hair' && (parecido(x.color, S.cfg.hair) || parecido(x.color, effCfg().hair)); // no dar un pelo que ya se parece al suyo
+  const un = CAT.filter(x => !x.base && !S.owned.includes(x.id) && !mismo(x));
   if (!un.length) return null;
   if (S.opened === 0) return catItem('hat_elf_red');
+  if (!S.owned.some(id => id.startsWith('prank_'))) { const p = un.find(x => x.cat === 'prank'); if (p) return p; }
   const tot = un.reduce((a, x) => a + RAR[x.r][1], 0); let r = Math.random() * tot;
   for (const x of un) { r -= RAR[x.r][1]; if (r <= 0) return x; }
   return un[0];
@@ -436,6 +513,13 @@ document.addEventListener('click', async e => {
   else if (act === 'next') { clap(); next(); }
   else if (act === 'quit') { stopAudio(); ui = { screen: 'home' }; render(); }
   else if (act === 'mic') micRead();
+  else if (act === 'pclose') prLeave();
+  else if (act === 'preplay') playPrank(ui.id, ui.from);
+  else if (act === 'pnext') prMove(1);
+  else if (act === 'plike') { ui.likes++; const b = el.querySelector('b'); if (b) b.textContent = ui.likes; sfx.ok(); const h = document.createElement('span'); h.className = 'heart'; h.textContent = '❤️'; el.appendChild(h); setTimeout(() => h.remove(), 900); }
+  else if (act === 'pranks') { const o = prOwned(); if (o.length) playPrank(o[0].scene, 'home'); }
+  else if (act === 'sparks') { ui.spk = true; sfx.ok(); render(); confetti(); }
+  else if (act === 'sclose') { ui.spk = false; render(); }
   else if (act === 'said') { sfx.ok(); clap(); curQ().locked = true; next(); }
   else if (act === 'opt') {
     const q = curQ(); if (q.locked) return;
@@ -452,13 +536,13 @@ document.addEventListener('click', async e => {
     ui.box.shake = true; render(); sfx.box();
     await sleep(750);
     const item = roll(); S.boxes = Math.max(0, S.boxes - 1); S.opened++;
-    if (item) S.owned.push(item.id); else S.sparkles += 5;
+    if (item) S.owned.push(item.id); else { S.sparkles += 5; convertSparks(); }
     save(); ui = { screen: 'box', box: { stage: 'open', item } }; render(); confetti(); sfx.win(); sayEs('surprise');
   }
-  else if (act === 'equip') { const it = catItem(el.dataset.id); S.eq[it.cat] = it.id; save(); ui = { screen: 'home' }; render(); }
+  else if (act === 'equip') { const p0 = catItem(el.dataset.id); if (p0.cat === 'prank') { playPrank(p0.scene, 'home'); return; } const it = catItem(el.dataset.id); S.eq[it.cat] = it.id; save(); ui = { screen: 'home' }; render(); }
   else if (act === 'closet') { ui = { screen: 'closet', tab: 'hat' }; render(); }
   else if (act === 'tab') { ui.tab = el.dataset.k; render(); }
-  else if (act === 'wear') { const it = catItem(el.dataset.id); S.eq[it.cat] = (S.eq[it.cat] === it.id && !it.base) ? null : it.id; if (it.cat === 'outfit' && !S.eq.outfit) S.eq.outfit = 'o_basic'; save(); render(); }
+  else if (act === 'wear') { const p0 = catItem(el.dataset.id); if (p0.cat === 'prank') { playPrank(p0.scene, 'closet'); return; } const it = catItem(el.dataset.id); S.eq[it.cat] = (S.eq[it.cat] === it.id && !it.base) ? null : it.id; if (it.cat === 'outfit' && !S.eq.outfit) S.eq.outfit = 'o_basic'; save(); render(); }
   else if (act === 'gclose') { ui.gear = false; render(); }
   else if (act === 'gday') { S.dayOff++; save(); render(); }
   else if (act === 'gbox') { S.boxes++; save(); ui.gear = false; render(); }
@@ -477,7 +561,7 @@ async function boot() {
   try {
     [C, MAN] = await Promise.all([fetch('content.json').then(r => r.json()), fetch('manifest.json').then(r => r.json())]);
   } catch (e) { $('#app').innerHTML = '<p class="loading">No se pudo cargar el curso. Recarga la página.</p>'; return; }
-  if (location.hash === '#debug') window.__dbg = () => ({ ui, S });
+  if (location.hash === '#debug') window.__dbg = () => ({ ui, S, playPrank, render, roll, CAT, convertSparks, restoreSess, snap, newToday, today });
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
   S = await loadBest();
   micInit();
